@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Environment setup
+
+Copy `.env.example` to `.env.local` and set `HOSPITAL_API_URL` to the Django API origin. The URL is server-only because browser requests use the frontend's `/api/*` route handlers as a proxy.
+
+```env
+HOSPITAL_API_URL=http://127.0.0.1:8000
+```
+
 ## Getting Started
 
 First, run the development server:
