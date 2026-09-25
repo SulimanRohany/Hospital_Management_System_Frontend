@@ -32,7 +32,7 @@ export default function BackupPage() {
       const blob = await response.blob();
       const disposition = response.headers.get("content-disposition") || "";
       const match = disposition.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
-      const filename = decodeURIComponent(match?.[1] || `health-plus-backup-${localDate(new Date())}.dump`);
+      const filename = decodeURIComponent(match?.[1] || `health-plus-backup-${localDate(new Date())}.sqlite3`);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -63,7 +63,7 @@ export default function BackupPage() {
           <span className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15"><Database className="size-6" /></span>
           <p className="text-xs font-bold uppercase tracking-[.16em] text-cyan-200">Administrator safeguard</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">Create a database backup</h2>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-cyan-50/75">Generate a consistent PostgreSQL backup and download it to your computer. The action is recorded in the audit log.</p>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-cyan-50/75">Generate a consistent SQLite backup and download it to your computer. The action is recorded in the audit log.</p>
         </div>
         <div className="space-y-4 p-6 sm:p-8">
           {state.error && <Alert variant="destructive"><TriangleAlert /><AlertDescription>{state.error}</AlertDescription></Alert>}
