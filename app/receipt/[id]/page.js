@@ -109,31 +109,36 @@ export default function ReceiptPage() {
             min-width: 80mm;
             margin: 0 !important;
             padding: 0 !important;
-            background: white !important;
+            color-scheme: only light !important;
+            background: #fff !important;
           }
 
           body {
             color: #000 !important;
             font-family: Arial, sans-serif;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+            forced-color-adjust: none;
+            print-color-adjust: economy;
+            -webkit-print-color-adjust: economy;
           }
 
-          .thermal-receipt-page {
+          html body .thermal-receipt-page {
             width: 74mm;
             min-height: 0;
             margin: 0;
             padding: 0;
-            background: white !important;
+            color-scheme: only light !important;
+            background: #fff !important;
           }
 
-          .thermal-receipt {
+          html body .thermal-receipt {
             box-sizing: border-box;
             width: 74mm;
             max-width: 74mm !important;
             margin: 0;
             padding: 0 1mm 2mm !important;
             color: #000 !important;
+            color-scheme: only light !important;
+            background: #fff !important;
             font-size: 10px;
             line-height: 1.25;
           }
@@ -142,6 +147,12 @@ export default function ReceiptPage() {
             border-color: #000 !important;
             color: #000 !important;
             box-shadow: none !important;
+          }
+
+          /* Never let the application's dark theme become printable ink. */
+          .thermal-receipt :where(header, section, footer, div, p, span) {
+            background-color: transparent !important;
+            background-image: none !important;
           }
 
           .receipt-header {
