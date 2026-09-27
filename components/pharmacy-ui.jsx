@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/language-provider";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 export const PHARMACY_ROLES = ["administrator", "pharmacy", "manager", "finance"];
 export const WRITE_ROLES = ["administrator", "pharmacy"];
@@ -120,9 +121,13 @@ export function Select({
   options, 
   required = false, 
   disabled = false, 
+  searchable = false,
   className = "" 
 }) {
   const { t } = useLanguage();
+  const translatedOptions = options.map(([key, label]) => [key, typeof label === "string" ? t(label) : label]);
+  const recordBacked = translatedOptions.some(([key]) => /^\d+$|^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(String(key)));
+  if (searchable || recordBacked) return <SearchableSelect name={name} required={required} disabled={disabled} value={value} onChange={onChange} placeholder={t(placeholder)} options={translatedOptions} className={className} />;
   return (
     <select 
       name={name}
@@ -135,9 +140,9 @@ export function Select({
       <option value="">
         {t(placeholder)}
       </option>
-      {options.map(([key, label]) => (
+      {translatedOptions.map(([key, label]) => (
         <option key={key} value={key}>
-          {typeof label === "string" ? t(label) : label}
+          {label}
         </option>
       ))}
     </select>

@@ -11,6 +11,7 @@ const ALLOWED_PATHS = new Set([
   "reports/laboratory",
   "reports/stock",
   "database-backup",
+  "database-restore",
 ]);
 
 function backendPath(request, segments) {

@@ -33,7 +33,7 @@ function dateTime(value) {
 
 function Row({ label, value, strong = false }) {
   return (
-    <div className="flex items-start justify-between gap-6 py-1.5 text-sm">
+    <div className="receipt-total-row flex items-start justify-between gap-6 py-1.5 text-sm">
       <span className="text-slate-500 dark:text-slate-400">{label}</span>
       <span className={`text-right text-slate-900 dark:text-slate-100 ${strong ? "font-bold" : "font-medium"}`}>
         {value}
@@ -95,8 +95,243 @@ export default function ReceiptPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 dark:bg-slate-800 px-4 py-8 print:bg-white print:p-0">
-      <style>{`@page { size: A4; margin: 12mm; }`}</style>
+    <main className="thermal-receipt-page min-h-screen bg-slate-100 dark:bg-slate-800 px-4 py-8 print:bg-white print:p-0">
+      <style>{`
+        @page {
+          size: 80mm 200mm;
+          margin: 3mm;
+        }
+
+        @media print {
+          html,
+          body {
+            width: 80mm;
+            min-width: 80mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+
+          body {
+            color: #000 !important;
+            font-family: Arial, sans-serif;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+
+          .thermal-receipt-page {
+            width: 74mm;
+            min-height: 0;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+          }
+
+          .thermal-receipt {
+            box-sizing: border-box;
+            width: 74mm;
+            max-width: 74mm !important;
+            margin: 0;
+            padding: 0 1mm 2mm !important;
+            color: #000 !important;
+            font-size: 10px;
+            line-height: 1.25;
+          }
+
+          .thermal-receipt * {
+            border-color: #000 !important;
+            color: #000 !important;
+            box-shadow: none !important;
+          }
+
+          .receipt-header {
+            display: block;
+            padding-bottom: 2mm;
+            border-bottom-width: 1px !important;
+            text-align: center;
+          }
+
+          .receipt-brand {
+            flex-direction: column;
+            justify-content: center;
+            gap: 1mm;
+          }
+
+          .receipt-logo {
+            width: 22mm !important;
+            height: 15mm !important;
+            border: 0;
+            border-radius: 0 !important;
+            background: white !important;
+            padding: 0 !important;
+          }
+
+          .receipt-logo svg {
+            width: 12mm !important;
+            height: 12mm !important;
+            stroke-width: 1.5;
+          }
+
+          .receipt-header h1 {
+            font-size: 14px;
+            line-height: 1.1;
+          }
+
+          .receipt-kicker {
+            margin-top: .5mm;
+            font-size: 7px;
+            letter-spacing: .06em;
+          }
+
+          .receipt-number {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin-top: 1.5mm;
+            padding-top: 1.5mm;
+            border-top: 1px dashed #000;
+            text-align: start;
+          }
+
+          .receipt-number p {
+            margin: 0;
+            font-size: 8px;
+            line-height: 1.35;
+          }
+
+          .receipt-number p:first-child {
+            grid-row: span 2;
+            align-self: center;
+          }
+
+          .receipt-number p:nth-child(2) {
+            font-size: 9px;
+            text-align: end;
+          }
+
+          .receipt-number p:last-child {
+            text-align: end;
+          }
+
+          .receipt-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2mm;
+            padding: 2mm 0;
+          }
+
+          .receipt-details > div + div {
+            margin-top: 0;
+            text-align: end;
+          }
+
+          .receipt-details h2,
+          .receipt-services h2,
+          .receipt-payments h2 {
+            margin-bottom: .5mm;
+            font-size: 7px;
+            letter-spacing: .04em;
+          }
+
+          .receipt-details p {
+            margin-top: .3mm;
+            font-size: 8px;
+          }
+
+          .receipt-details p:first-of-type {
+            font-size: 9px;
+          }
+
+          .receipt-services {
+            padding: 2mm 0 0;
+          }
+
+          .receipt-services > h2 {
+            display: none;
+          }
+
+          .receipt-service-table {
+            border-width: 1px 0 !important;
+            border-radius: 0 !important;
+          }
+
+          .receipt-service-row {
+            grid-template-columns: minmax(0, 1fr) 8mm 22mm !important;
+            padding: 1mm 0 !important;
+            font-size: 8px !important;
+            background: white !important;
+          }
+
+          .receipt-service-row + .receipt-service-row {
+            border-top-style: dashed !important;
+          }
+
+          .receipt-service-row p {
+            overflow-wrap: anywhere;
+          }
+
+          .receipt-service-row p:last-child {
+            font-size: 7px;
+          }
+
+          .receipt-totals {
+            max-width: none !important;
+            border-top: 0 !important;
+            padding-top: 1mm;
+          }
+
+          .receipt-total-row {
+            gap: 3mm;
+            padding: .45mm 0;
+            font-size: 9px;
+          }
+
+          .receipt-total-row:nth-child(3),
+          .receipt-total-row:nth-last-child(2) {
+            font-size: 10px;
+          }
+
+          .receipt-payments {
+            display: none;
+          }
+
+          .receipt-payment-row {
+            gap: 2mm;
+            padding: 1mm 0;
+            font-size: 9px;
+          }
+
+          .receipt-payment-row > span:first-child {
+            min-width: 0;
+            overflow-wrap: anywhere;
+          }
+
+          .receipt-payment-row > span:last-child {
+            flex: none;
+            white-space: nowrap;
+          }
+
+          .receipt-footer {
+            display: block;
+            margin-top: 2mm;
+            padding-top: 1.5mm;
+            font-size: 8px;
+          }
+
+          .receipt-footer > p {
+            margin-top: 1.5mm;
+            text-align: center;
+          }
+
+          .receipt-header,
+          .receipt-details,
+          .receipt-service-row,
+          .receipt-totals,
+          .receipt-payment-row,
+          .receipt-footer {
+            break-inside: avoid;
+          }
+        }
+      `}</style>
       <div className="mx-auto mb-4 flex max-w-[760px] items-center justify-between print:hidden">
         <button className="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800" onClick={() => window.close()}>
           <ArrowLeft className="size-4" /> Close
@@ -109,23 +344,23 @@ export default function ReceiptPage() {
         </div>
       </div>
 
-      <article className="mx-auto max-w-[760px] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 shadow-sm print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none">
-        <header className="flex items-start justify-between gap-6 border-b-2 border-cyan-700 pb-6">
-          <div className="flex items-center gap-3">
-            <HospitalLogo className="size-12 rounded-xl bg-cyan-700 p-1.5 text-white" iconClassName="size-7" />
+      <article className="thermal-receipt mx-auto max-w-[760px] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 shadow-sm print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none">
+        <header className="receipt-header flex items-start justify-between gap-6 border-b-2 border-cyan-700 pb-6">
+          <div className="receipt-brand flex items-center gap-3">
+            <HospitalLogo className="receipt-logo size-12 rounded-xl bg-cyan-700 p-1.5 text-white" iconClassName="size-7" />
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-slate-50" data-no-translate><bdi dir="auto">{branding.hospital_name}</bdi></h1>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">Payment receipt</p>
+              <p className="receipt-kicker text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-300">Payment receipt</p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="receipt-number text-right">
             <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Receipt number</p>
             <p className="mt-1 font-mono text-sm font-bold text-slate-950 dark:text-slate-50">{receipt.receipt_number}</p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Issued {dateTime(receipt.issued_at)}</p>
           </div>
         </header>
 
-        <section className="grid gap-8 border-b border-slate-200 dark:border-slate-700 py-6 sm:grid-cols-2">
+        <section className="receipt-details grid gap-8 border-b border-slate-200 dark:border-slate-700 py-6 sm:grid-cols-2">
           <div>
             <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Patient</h2>
             <p className="text-lg font-bold text-slate-950 dark:text-slate-50">{receipt.patient.name}</p>
@@ -139,14 +374,14 @@ export default function ReceiptPage() {
           </div>
         </section>
 
-        <section className="py-6">
+        <section className="receipt-services py-6">
           <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Services</h2>
-          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-            <div className="grid grid-cols-[1fr_70px_120px] bg-slate-50 dark:bg-slate-900/60 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <div className="receipt-service-table overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="receipt-service-row grid grid-cols-[1fr_70px_120px] bg-slate-50 dark:bg-slate-900/60 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <span>Description</span><span className="text-center">Qty</span><span className="text-right">Amount</span>
             </div>
             {receipt.services.map((service) => (
-              <div key={service.id} className="grid grid-cols-[1fr_70px_120px] border-t border-slate-200 dark:border-slate-700 px-4 py-3 text-sm">
+              <div key={service.id} className="receipt-service-row grid grid-cols-[1fr_70px_120px] border-t border-slate-200 dark:border-slate-700 px-4 py-3 text-sm">
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">{service.service_name}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">{service.service_code}</p>
@@ -158,7 +393,7 @@ export default function ReceiptPage() {
           </div>
         </section>
 
-        <section className="ml-auto w-full max-w-sm border-t border-slate-200 dark:border-slate-700 pt-4">
+        <section className="receipt-totals ml-auto w-full max-w-sm border-t border-slate-200 dark:border-slate-700 pt-4">
           <Row label="Subtotal" value={`AFN ${money(receipt.total_amount)}`} />
           {Number(receipt.discount_amount) > 0 && <Row label="Discount" value={`− AFN ${money(receipt.discount_amount)}`} />}
           <Row label="Net total" value={`AFN ${money(receipt.net_amount)}`} strong />
@@ -169,10 +404,10 @@ export default function ReceiptPage() {
         </section>
 
         {receipt.payments.length > 0 && (
-          <section className="mt-6 border-t border-slate-200 dark:border-slate-700 pt-5">
+          <section className="receipt-payments mt-6 border-t border-slate-200 dark:border-slate-700 pt-5">
             <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Payment history</h2>
             {receipt.payments.map((payment) => (
-              <div key={payment.id} className="flex justify-between gap-4 border-b border-slate-100 dark:border-slate-800 py-2 text-sm last:border-0">
+              <div key={payment.id} className="receipt-payment-row flex justify-between gap-4 border-b border-slate-100 dark:border-slate-800 py-2 text-sm last:border-0">
                 <span className="text-slate-600 dark:text-slate-300">{dateTime(payment.paid_at)} · <span className="capitalize">{payment.method}</span></span>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">AFN {money(payment.amount)}</span>
               </div>
@@ -180,7 +415,7 @@ export default function ReceiptPage() {
           </section>
         )}
 
-        <footer className="mt-8 flex items-end justify-between gap-6 border-t border-dashed border-slate-300 dark:border-slate-600 pt-5 text-xs text-slate-500 dark:text-slate-400">
+        <footer className="receipt-footer mt-8 flex items-end justify-between gap-6 border-t border-dashed border-slate-300 dark:border-slate-600 pt-5 text-xs text-slate-500 dark:text-slate-400">
           <div>
             <p>Received by: <span className="font-medium text-slate-700 dark:text-slate-300">{receipt.created_by}</span></p>
             <p className="mt-1">Payment status: <span className="font-semibold text-slate-700 dark:text-slate-300">{paymentStatus[receipt.payment_status] || receipt.payment_status}</span></p>

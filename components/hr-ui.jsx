@@ -7,7 +7,8 @@ export const HR_WRITE_ROLES = ["administrator", "hr"];
 
 export async function hrApi(path, options = {}) {
   let response;
-  try { response = await fetch(`/api/hr/${path}`, options); }
+  const requestPath = path.replace("page_size=500", "page_size=1000");
+  try { response = await fetch(`/api/hr/${requestPath}`, options); }
   catch { throw new Error("The hospital server could not be reached."); }
   let data = null;
   if (response.status !== 204) data = await response.json().catch(() => null);

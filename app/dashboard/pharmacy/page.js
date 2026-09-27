@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/components/auth-context";
 import { useLanguage } from "@/components/language-provider";
 import { api, errorSummary, formatDate, Modal, money, PHARMACY_ROLES, qty, rows, Select, WRITE_ROLES } from "@/components/pharmacy-ui";
-import { CategoryForm, MedicineForm, PaymentForm, PurchaseForm, SaleForm, SimpleEntityForm, StockAdjustmentForm, TransactionDetail, VoidForm } from "@/components/pharmacy-forms";
+import { CategoryForm, MedicineForm, OpeningStockForm, PaymentForm, PurchaseForm, SaleForm, SimpleEntityForm, StockAdjustmentForm, TransactionDetail, VoidForm } from "@/components/pharmacy-forms";
 import { hasRole, withSectionRole } from "@/lib/roles";
 
 const tabs = [
@@ -330,7 +330,8 @@ const config = {
       ["in_stock", "Any stock", [["true", "In stock"]]],
       ["active", "Any state", [["true", "Active"], ["false", "Inactive"]]]
     ],
-    columns: ["Medicine / batch", "Supplier", "Expiry", "Received", "Available", "State"]
+    columns: ["Medicine / batch", "Supplier / source", "Expiry", "Received", "Available", "State"],
+    create: "Add opening stock"
   },
   movements: {
     endpoint: "stock-movements",
@@ -338,6 +339,7 @@ const config = {
     search: "Reference, reason, batch or medicine",
     filters: [["movement_type", "Any movement", [
       ["purchase", "Purchase"],
+      ["opening_stock", "Opening stock"],
       ["sale", "Sale"],
       ["adjustment_in", "Adjustment in"],
       ["adjustment_out", "Adjustment out"],
@@ -711,7 +713,7 @@ function rowCells(kind, x, user) {
     const expired = new Date(`${x.expiry_date}T23:59:59`) <= new Date();
     return [
       <Name key="n" main={x.medicine_name} sub={x.batch_number} />,
-      x.supplier_name,
+      x.supplier_name || "Opening stock",
       <span key="d" className={expired ? "font-semibold text-red-700 dark:text-red-300" : ""}>
         {formatDate(x.expiry_date)}
       </span>,
@@ -778,6 +780,9 @@ function DialogRouter({ kind, mode, item, user, close, saved, onOpenExisting }) 
     }
     if (kind === "purchases") {
       return <PurchaseForm onClose={close} onSaved={() => saved("Purchase posted and stock received.")} />;
+    }
+    if (kind === "batches") {
+      return <OpeningStockForm onClose={close} onSaved={() => saved("Opening stock added without supplier or wallet activity.")} />;
     }
     if (kind === "medicines") {
       return <MedicineForm onClose={close} onOpenExisting={onOpenExisting} onSaved={() => saved("Medicine created.")} />;

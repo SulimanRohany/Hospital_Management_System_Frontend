@@ -62,7 +62,7 @@ export default function AccountsPage() {
     try {
       const [userResponse, departmentResponse] = await Promise.all([
         fetch(`/api/accounts/users?${params}`),
-        fetch("/api/accounts/departments?ordering=name")
+        fetch("/api/accounts/departments?ordering=name&page_size=1000")
       ]);
       
       const userData = await userResponse.json();

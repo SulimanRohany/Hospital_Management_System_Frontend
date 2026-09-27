@@ -109,7 +109,7 @@ export default function ReceptionPage() {
       const [visitResponse, queueResponse, departmentResponse] = await Promise.all([
         fetch(`/api/reception/receptions?${params}`),
         fetch(`/api/reception/receptions/queue?${queueParams}`),
-        fetch("/api/reception/departments?is_active=true&ordering=name"),
+        fetch("/api/reception/departments?is_active=true&ordering=name&page_size=1000"),
       ]);
       
       const visitData = await visitResponse.json();
@@ -508,8 +508,8 @@ function VisitDialog({ departments, onClose, onSaved }) {
     if (!form.department) return; 
     
     Promise.all([
-      fetch(`/api/reception/services?is_active=true&department=${form.department}&ordering=name`), 
-      fetch(`/api/accounts/users?role=clinician&department=${form.department}&is_active=true&ordering=username`)
+      fetch(`/api/reception/services?is_active=true&department=${form.department}&ordering=name&page_size=1000`), 
+      fetch(`/api/accounts/users?role=clinician&department=${form.department}&is_active=true&ordering=username&page_size=1000`)
     ]).then(async ([s, p]) => { 
       if (s.ok) { 
         const d = await s.json(); 
@@ -599,20 +599,16 @@ function VisitDialog({ departments, onClose, onSaved }) {
             </Field>
             
             <Field label="Department">
-              <select
+              <SearchableSelect
                 required
-                className="h-11 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3.5 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition focus:border-cyan-600 focus:ring-3 focus:ring-cyan-600/10"
                 value={form.department} 
-                onChange={(e) => { 
-                  setForm({ ...form, department: e.target.value, provider: "" }); 
+                onChange={(department) => { 
+                  setForm({ ...form, department, provider: "" }); 
                   setLines([{ service: "", quantity: 1 }]); 
                 }}
-              >
-                <option value="">Select department</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
+                placeholder="Search department"
+                options={departments.map((d) => [d.id, d.name])}
+              />
             </Field>
             
             <Field label="Visit type">
@@ -630,18 +626,12 @@ function VisitDialog({ departments, onClose, onSaved }) {
             </Field>
             
             <Field label="Provider (optional)">
-              <select
-                className="h-11 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3.5 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition focus:border-cyan-600 focus:ring-3 focus:ring-cyan-600/10"
+              <SearchableSelect
                 value={form.provider} 
-                onChange={(e) => setForm({ ...form, provider: e.target.value })}
-              >
-                <option value="">Unassigned</option>
-                {providers.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {[p.first_name, p.last_name].filter(Boolean).join(" ") || p.username}
-                  </option>
-                ))}
-              </select>
+                onChange={(provider) => setForm({ ...form, provider })}
+                placeholder="Search provider (optional)"
+                options={providers.map((p) => [p.id, [p.first_name, p.last_name].filter(Boolean).join(" ") || p.username])}
+              />
             </Field>
             
             <Field label="Room">
@@ -678,23 +668,17 @@ function VisitDialog({ departments, onClose, onSaved }) {
           <div className="space-y-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-900/40 p-4 sm:p-5">
             {lines.map((line, index) => (
               <div key={index} className="grid grid-cols-[minmax(0,1fr)_90px_44px] items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 shadow-sm">
-                <select 
+                <SearchableSelect
                   required 
-                  className="h-11 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition focus:border-cyan-600 focus:ring-3 focus:ring-cyan-600/10" 
                   value={line.service} 
-                  onChange={(e) => setLines(
+                  onChange={(service) => setLines(
                     lines.map((item, i) => 
-                      i === index ? { ...item, service: e.target.value } : item
+                      i === index ? { ...item, service } : item
                     )
                   )}
-                >
-                  <option value="">Select service</option>
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} · AFN {money(s.standard_fee)}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Search service"
+                  options={services.map((s) => [s.id, `${s.name} · AFN ${money(s.standard_fee)}`])}
+                />
                 <Input 
                   required 
                   type="number" 

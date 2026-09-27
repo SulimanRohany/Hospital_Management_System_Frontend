@@ -1,5 +1,15 @@
 {
   "ps": {
+    "Supplier / source": "عرضه کوونکی / سرچینه",
+    "Add opening stock": "پرانیستې زېرمه زیاته کړئ",
+    "Opening stock": "پرانیستې زېرمه",
+    "Opening stock added without supplier or wallet activity.": "پرانیستې زېرمه د عرضه کوونکي یا صندوق له فعالیت پرته زیاته شوه.",
+    "Receive inventory already owned by the hospital without a supplier, payable, or wallet payment.": "هغه زېرمه چې روغتون یې له مخکې مالک دی، د عرضه کوونکي، پور یا صندوق تادیې پرته ثبت کړئ.",
+    "Use this only for stock the hospital already owns. Future deliveries should be entered as purchases.": "دا یوازې د هغې زېرمې لپاره وکاروئ چې روغتون یې له مخکې مالک دی. راتلونکې تحویلي باید د پېرود په توګه ثبت شي.",
+    "Opening stock lines": "د پرانیستې زېرمې توکي",
+    "Reason / source note": "د لامل / سرچینې یادښت",
+    "Explain where this opening inventory came from": "روښانه کړئ چې دا پرانیستې زېرمه له کومه راغلې",
+    "Existing inventory entered during system setup": "د سیسټم د نصب پر مهال موجوده زېرمه ثبت شوه",
     "New category": "نوی کټګوري",
     "Refresh records": "تازه کول ریکارډونه",
     "Open row actions": "پرانیستل کرښه کړنې",
@@ -297,6 +307,16 @@
     "Dark mode": "تیاره بڼه"
   },
   "fa": {
+    "Supplier / source": "عرضه‌کننده / منبع",
+    "Add opening stock": "افزودن موجودی ابتدایی",
+    "Opening stock": "موجودی ابتدایی",
+    "Opening stock added without supplier or wallet activity.": "موجودی ابتدایی بدون فعالیت عرضه‌کننده یا صندوق افزوده شد.",
+    "Receive inventory already owned by the hospital without a supplier, payable, or wallet payment.": "موجودی متعلق به شفاخانه را بدون عرضه‌کننده، حساب پرداختنی یا پرداخت صندوق ثبت کنید.",
+    "Use this only for stock the hospital already owns. Future deliveries should be entered as purchases.": "این گزینه را فقط برای موجودی‌ای استفاده کنید که از قبل متعلق به شفاخانه است. تحویل‌های آینده باید به‌عنوان خرید ثبت شوند.",
+    "Opening stock lines": "اقلام موجودی ابتدایی",
+    "Reason / source note": "یادداشت دلیل / منبع",
+    "Explain where this opening inventory came from": "توضیح دهید این موجودی ابتدایی از کجا آمده است",
+    "Existing inventory entered during system setup": "موجودی قبلی هنگام راه‌اندازی سیستم ثبت شد",
     "New category": "جدید دسته‌بندی",
     "Refresh records": "تازه‌سازی سوابق",
     "Open row actions": "باز ردیف اقدامات",

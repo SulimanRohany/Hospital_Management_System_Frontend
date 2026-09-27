@@ -110,7 +110,7 @@ export function SaleForm({ user, onClose, onSaved }) {
   }, [query]);
 
   useEffect(() => {
-    api("patients/?is_active=true&ordering=first_name")
+    api("patients/?is_active=true&ordering=first_name&page_size=1000")
       .then((d) => setPatients(rows(d)))
       .catch(() => setPatients([]));
   }, []);
@@ -320,6 +320,7 @@ export function SaleForm({ user, onClose, onSaved }) {
             error={inputError(error, "patient")}
           >
             <Select 
+              searchable
               required={needsRx}
               value={form.patient} 
               onChange={(v) => setForm({ ...form, patient: v })} 
@@ -407,8 +408,8 @@ export function PurchaseForm({ onClose, onSaved }) {
 
   useEffect(() => {
     Promise.all([
-      api("suppliers/?ordering=name"),
-      api("medicines/?ordering=name")
+      api("suppliers/?ordering=name&page_size=1000"),
+      api("medicines/?ordering=name&page_size=1000")
     ]).then(([s, m]) => {
       setSuppliers(rows(s).filter((x) => x.is_active));
       setMedicines(rows(m).filter((x) => x.is_active));
@@ -456,6 +457,7 @@ export function PurchaseForm({ onClose, onSaved }) {
         <div className="grid gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/60 p-4 md:grid-cols-3">
           <Field label="Supplier" error={inputError(error, "supplier")}>
             <Select 
+              searchable
               required 
               placeholder="Select supplier"
               value={form.supplier} 
@@ -505,6 +507,7 @@ export function PurchaseForm({ onClose, onSaved }) {
                 className="grid gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_44px]"
               >
                 <Select 
+                  searchable
                   required 
                   value={l.medicine} 
                   onChange={(v) => line(i, "medicine", v)} 
@@ -603,6 +606,163 @@ export function PurchaseForm({ onClose, onSaved }) {
           saving={saving} 
           disabled={!lines.length || Number(form.paid_amount) > total} 
           label="Post purchase" 
+        />
+      </form>
+    </Modal>
+  );
+}
+
+export function OpeningStockForm({ onClose, onSaved }) {
+  const [medicines, setMedicines] = useState([]);
+  const [lines, setLines] = useState([newPurchaseLine()]);
+  const [reason, setReason] = useState("Existing inventory entered during system setup");
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api("medicines/?ordering=name&page_size=1000")
+      .then((data) => setMedicines(rows(data).filter((item) => item.is_active)))
+      .catch(setError);
+  }, []);
+
+  function updateLine(index, key, value) {
+    setLines(lines.map((item, itemIndex) =>
+      itemIndex === index ? { ...item, [key]: value } : item
+    ));
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await post("stock-movements/opening-stock/", { reason, lines });
+      onSaved();
+    } catch (reason) {
+      setError(reason);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal
+      title="Add opening stock"
+      subtitle="Receive inventory already owned by the hospital without a supplier, payable, or wallet payment."
+      onClose={onClose}
+      wide
+    >
+      <form onSubmit={submit} className="space-y-6">
+        {error && <FormError error={error} />}
+
+        <Alert className="border-cyan-200 bg-cyan-50 text-cyan-950 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-100">
+          <AlertDescription>
+            Use this only for stock the hospital already owns. Future deliveries should be entered as purchases.
+          </AlertDescription>
+        </Alert>
+
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-semibold">Opening stock lines</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setLines([...lines, newPurchaseLine()])}
+            >
+              <Plus />Add line
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {lines.map((item, index) => (
+              <div
+                key={index}
+                className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_44px]"
+              >
+                <Select
+                  searchable
+                  required
+                  value={item.medicine}
+                  onChange={(value) => updateLine(index, "medicine", value)}
+                  placeholder="Medicine"
+                  options={medicines.map((medicine) => [
+                    medicine.id,
+                    `${medicine.name}${medicine.strength ? ` ${medicine.strength}` : ""}`
+                  ])}
+                />
+                <Input
+                  required
+                  placeholder="Batch no."
+                  value={item.batch_number}
+                  onChange={(event) => updateLine(index, "batch_number", event.target.value)}
+                />
+                <DatePicker
+                  required
+                  aria-label="Expiry date"
+                  min={dayAfter(today())}
+                  value={item.expiry_date}
+                  onChange={(value) => updateLine(index, "expiry_date", value)}
+                />
+                <Input
+                  required
+                  type="number"
+                  min="0.001"
+                  step="0.001"
+                  placeholder="Quantity"
+                  value={item.quantity}
+                  onChange={(event) => updateLine(index, "quantity", event.target.value)}
+                />
+                <div className="space-y-2">
+                  <Input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Unit cost"
+                    value={item.unit_cost}
+                    onChange={(event) => updateLine(index, "unit_cost", event.target.value)}
+                  />
+                  <Input
+                    required
+                    type="number"
+                    min={item.unit_cost || 0}
+                    step="0.01"
+                    placeholder="Sale price"
+                    value={item.sale_price}
+                    onChange={(event) => updateLine(index, "sale_price", event.target.value)}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Remove opening stock line ${index + 1}`}
+                  title="Remove line"
+                  disabled={lines.length === 1}
+                  onClick={() => setLines(lines.filter((_, itemIndex) => index !== itemIndex))}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <Field label="Reason / source note" error={inputError(error, "reason")}>
+          <Textarea
+            required
+            placeholder="Explain where this opening inventory came from"
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+          />
+        </Field>
+
+        <Actions
+          close={onClose}
+          saving={saving}
+          disabled={!lines.length || !reason.trim()}
+          label="Add opening stock"
         />
       </form>
     </Modal>
@@ -742,7 +902,7 @@ export function MedicineForm({ item, onClose, onSaved, onOpenExisting }) {
   }, []);
 
   useEffect(() => {
-    api("medicine-categories/?ordering=name")
+    api("medicine-categories/?ordering=name&page_size=1000")
       .then((d) => setCategories(rows(d).filter((x) => x.is_active || x.id === item?.category)))
       .catch(setError);
   }, [item]);
@@ -797,6 +957,7 @@ export function MedicineForm({ item, onClose, onSaved, onOpenExisting }) {
         <div className="grid gap-4 md:grid-cols-3">
           <Field label="Category">
             <Select 
+              searchable
               required 
               value={form.category} 
               onChange={(v) => setForm({ ...form, category: v })} 
@@ -1065,7 +1226,7 @@ export function StockAdjustmentForm({ onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api("medicine-batches/?in_stock=true&active=true&ordering=expiry_date")
+    api("medicine-batches/?in_stock=true&active=true&ordering=expiry_date&page_size=1000")
       .then((d) => setBatches(rows(d)))
       .catch(setError);
   }, []);
@@ -1098,6 +1259,7 @@ export function StockAdjustmentForm({ onClose, onSaved }) {
         
         <Field label="Batch">
           <Select 
+            searchable
             required 
             value={form.batch} 
             onChange={(v) => setForm({ ...form, batch: v })} 
@@ -1182,8 +1344,8 @@ export function PaymentForm({ onClose, onSaved }) {
 
   useEffect(() => {
     Promise.all([
-      api("suppliers/?ordering=name"),
-      api("wallets/?ordering=name")
+      api("suppliers/?ordering=name&page_size=1000"),
+      api("wallets/?ordering=name&page_size=1000")
     ]).then(([s, w]) => {
       setSuppliers(rows(s).filter((x) => x.is_active));
       setWallets(rows(w).filter((x) => x.is_active && ["pharmacy", "manager"].includes(x.kind)));
@@ -1233,6 +1395,7 @@ export function PaymentForm({ onClose, onSaved }) {
         
         <Field label="Supplier">
           <Select 
+            searchable
             required 
             value={form.supplier} 
             onChange={(v) => { 
@@ -1248,6 +1411,7 @@ export function PaymentForm({ onClose, onSaved }) {
         
         <Field label="Outstanding purchase (optional)">
           <Select 
+            searchable
             value={form.purchase} 
             onChange={(v) => setForm({ ...form, purchase: v, amount: "" })} 
             placeholder="Apply to supplier balance" 
@@ -1260,6 +1424,7 @@ export function PaymentForm({ onClose, onSaved }) {
         
         <Field label="Wallet">
           <Select 
+            searchable
             required 
             value={form.wallet} 
             onChange={(v) => setForm({ ...form, wallet: v })} 

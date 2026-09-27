@@ -105,7 +105,7 @@ function ServiceList({ user, notify }) {
   return <>
     <Stats values={[[Wrench, "Visible services", items.length], [CheckCircle2, "Available now", available], [FlaskConical, "Laboratory services", items.filter((x) => x.is_laboratory).length], [CircleDollarSign, "Discountable", items.filter((x) => x.is_discountable).length]]} />
     <ListToolbar title="Service catalog" subtitle="Fees, classification, and operational availability" search={search} setSearch={setSearch} refreshing={loading} refresh={() => setReload((x) => x + 1)} action={canEdit ? () => setDialog({ type: "form" }) : null} actionLabel="New service">
-      <Select value={department} onChange={setDepartment} options={departments.map((x) => [x.id, x.name])} placeholder="All departments" />
+      <Select searchable value={department} onChange={setDepartment} options={departments.map((x) => [x.id, x.name])} placeholder="Search departments" />
       <Select value={status} onChange={setStatus} options={[["true", "Active"], ["false", "Inactive"]]} placeholder="All statuses" />
       <Select value={kind} onChange={setKind} options={[["true", "Laboratory"], ["false", "General"]]} placeholder="All types" />
     </ListToolbar>

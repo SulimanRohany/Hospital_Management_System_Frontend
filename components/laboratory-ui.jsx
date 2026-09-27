@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/language-provider";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { formatDate as sharedFormatDate } from "@/components/pharmacy-ui";
 
 export const LAB_ROLES = ["administrator", "laboratory", "manager", "clinician", "reception"];
@@ -46,8 +47,12 @@ export function Field({ label, error, hint, children }) {
   return <div className="space-y-2"><Label htmlFor={id} className="font-semibold text-slate-700 dark:text-slate-300">{typeof label === "string" ? t(label) : label}{children?.props?.required && <span className="ml-1 text-red-500">*</span>}</Label>{control}{(error || hint) && <p className={`text-xs ${error ? "font-medium text-red-600 dark:text-red-300" : "text-slate-500 dark:text-slate-400"}`}>{typeof (error || hint) === "string" ? t(error || hint) : error || hint}</p>}</div>;
 }
 
-export function Select({ value, onChange, options, placeholder = "Select", className = "", ...props }) {
+export function Select({ value, onChange, options, placeholder = "Select", className = "", searchable = false, ...props }) {
   const { t } = useLanguage();
+  const translatedOptions = options.map(([key, label]) => [key, typeof label === "string" ? t(label) : label]);
+  const recordBacked = translatedOptions.some(([key]) => /^\d+$|^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(String(key)));
+  const searchableLookup = searchable || recordBacked || ["No linked visit", "No linked service"].includes(placeholder);
+  if (searchableLookup) return <SearchableSelect {...props} value={value} onChange={onChange} options={translatedOptions} placeholder={t(placeholder)} className={className} />;
   return <select {...props} value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={`h-11 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3.5 text-sm shadow-sm outline-none focus:border-cyan-600 focus:ring-3 focus:ring-cyan-600/10 disabled:bg-slate-100 ${className}`}><option value="">{t(placeholder)}</option>{options.map(([key, label]) => <option key={key} value={key}>{typeof label === "string" ? t(label) : label}</option>)}</select>;
 }
 
@@ -58,7 +63,8 @@ export const formatDate = sharedFormatDate;
 
 export async function labApi(path, options) {
   let response;
-  try { response = await fetch(`/api/laboratory/${path}`, options); }
+  const requestPath = path.replace("page_size=200", "page_size=1000");
+  try { response = await fetch(`/api/laboratory/${requestPath}`, options); }
   catch { throw new Error("The hospital server could not be reached."); }
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {

@@ -5,6 +5,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Field as FormField, Modal } from "@/components/pharmacy-ui";
 
 export const ROLES = [
@@ -186,20 +187,16 @@ function Field({ name, label, hint, ...props }) {
 }
 
 function SelectField({ name, label, options, ...props }) {
+  const emptyOption = options.find(([value]) => value === "");
   return (
     <FormField label={label}>
-      <select
+      <SearchableSelect
         id={name}
         name={name}
-        className="h-11 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3.5 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition focus:border-cyan-600 focus:ring-3 focus:ring-cyan-600/10"
+        placeholder={emptyOption?.[1] || `Search ${label.toLowerCase()}`}
+        options={options.filter(([value]) => value !== "")}
         {...props}
-      >
-        {options.map(([value, text]) => (
-          <option key={value} value={value}>
-            {text}
-          </option>
-        ))}
-      </select>
+      />
     </FormField>
   );
 }

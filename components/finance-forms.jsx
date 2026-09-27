@@ -105,8 +105,8 @@ export function ExpenseForm({ wallets, categories, onClose, onSaved }) {
     <form onSubmit={submit} className="space-y-5">
       {error && <ErrorBox error={error} />}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Field label="Category" error={inputError(error, "category")}><Select required value={form.category} onChange={(v) => set("category", v)} options={categories.filter((x) => x.is_active).map((x) => [x.id, x.name])} /></Field>
-        <Field label="Pay from wallet" error={inputError(error, "wallet")}><Select required value={form.wallet} onChange={(v) => set("wallet", v)} options={wallets.filter((x) => x.is_active).map((x) => [x.id, `${x.name} · AFN ${money(x.balance)}`])} /></Field>
+        <Field label="Category" error={inputError(error, "category")}><Select searchable required value={form.category} onChange={(v) => set("category", v)} options={categories.filter((x) => x.is_active).map((x) => [x.id, x.name])} /></Field>
+        <Field label="Pay from wallet" error={inputError(error, "wallet")}><Select searchable required value={form.wallet} onChange={(v) => set("wallet", v)} options={wallets.filter((x) => x.is_active).map((x) => [x.id, `${x.name} · AFN ${money(x.balance)}`])} /></Field>
         <Field label="Expense date" error={inputError(error, "expense_date")}><DatePicker required max={today()} value={form.expense_date} onChange={(value) => set("expense_date", value)} /></Field>
         <Field label="Amount (AFN)" error={inputError(error, "amount")}><Input required type="number" min="0.01" step="0.01" value={form.amount} onChange={(e) => set("amount", e.target.value)} /></Field>
         <Field label="Payee"><Input value={form.payee} onChange={(e) => set("payee", e.target.value)} /></Field>
@@ -139,8 +139,8 @@ export function TurnoverForm({ wallets, onClose, onSaved }) {
     <form onSubmit={submit} className="space-y-5">
       {error && <ErrorBox error={error} />}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Source wallet" error={inputError(error, "source_wallet")}><Select required value={form.source_wallet} onChange={(v) => set("source_wallet", v)} options={active.map((x) => [x.id, `${x.name} · AFN ${money(x.balance)}`])} /></Field>
-        <Field label="Destination wallet" error={inputError(error, "destination_wallet")}><Select required value={form.destination_wallet} onChange={(v) => set("destination_wallet", v)} options={active.filter((x) => x.id !== form.source_wallet).map((x) => [x.id, x.name])} /></Field>
+        <Field label="Source wallet" error={inputError(error, "source_wallet")}><Select searchable required value={form.source_wallet} onChange={(v) => set("source_wallet", v)} options={active.map((x) => [x.id, `${x.name} · AFN ${money(x.balance)}`])} /></Field>
+        <Field label="Destination wallet" error={inputError(error, "destination_wallet")}><Select searchable required value={form.destination_wallet} onChange={(v) => set("destination_wallet", v)} options={active.filter((x) => x.id !== form.source_wallet).map((x) => [x.id, x.name])} /></Field>
         <Field label="Amount (AFN)" error={inputError(error, "amount")}><Input required type="number" min="0.01" step="0.01" value={form.amount} onChange={(e) => set("amount", e.target.value)} /></Field>
         <div />
         <Field label="Period start" error={inputError(error, "period_start")}><Input required type="datetime-local" value={form.period_start} onChange={(e) => set("period_start", e.target.value)} /></Field>
